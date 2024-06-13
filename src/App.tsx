@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import './App.css'
 import { MouseEventHandler } from 'react'
+import Snake from './snake_components/snake'
 
 type buttonValue = {
   "X": string,
@@ -12,42 +13,42 @@ type boardState = string[]
 
 type winStatus = (boardState: string[]) => string
 
-function App() {
-  const [boardState, setBoardState] = useState(["", "", "", "", "", "", "", "", ""]) //initialize state of board as empty strings
+export default function App() {
+  const [board, setBoard] = useState(["", "", "", "", "", "", "", "", ""]) //initialize state of board as empty strings
   const [player, setPlayer] = useState("X")
-  const [playerName1, setPlayerName1] = useState("")
-  const [playerName2, setPlayerName2] = useState("")
-  const [conditional, setConditional] = useState(true)
+  const [playerName1, setPlayerName1] = useState("player 1")
+  const [playerName2, setPlayerName2] = useState("player 2")
+  const [submit, setSubmit] = useState(false)
+  const [input1, setInput1] = useState("player 1")
+  const [input2, setInput2] = useState("player 2")
 
-  console.log(boardState)
+  console.log(board)
 
   const togglePlayer = () => {
     setPlayer(player === "X" ? "O" : "X")
   }
 
   function boardSquareHandler(index: number) {
-    const nextBoard: string[] = boardState.map((b: string, i) => {
+    const nextBoard: string[] = board.map((b: string, i) => {
       if (b) { return b }
 
-      if (i === index && boardState[i] === "") {
+      if (i === index && board[i] === "") {
         togglePlayer()
         return player // whoever's turn it is
       }
       else return ""
     });
     // function handlePlay 
-    setBoardState(nextBoard);
+    setBoard(nextBoard);
   }
 
 
   interface BoardSquareProps {
     buttonValue?: string;
-    onClick: MouseEventHandler<HTMLDivElement>;
+    onClick: MouseEventHandler;
   }
 
   function BoardSquare({ buttonValue, onClick, }: BoardSquareProps) {
-    console.log('buttonValue is:', buttonValue)
-
     return (
       <>
         <button style={{ color: "red", width: '4em', height: '4em', border: '1px white', backgroundColor: 'white' }} onClick={onClick} value={buttonValue}>{buttonValue}</button>
@@ -55,88 +56,91 @@ function App() {
     )
   }
 
-
-  const allAreEqualAndValid = (characters: string[]) => {
+  const allAreEqualAndValid = (position: string[]) => {
     // are the values in here and are they all equal to each other
-    const validPlayers = ["X", "O"]
-    return validPlayers.includes(characters[0]) && characters[0] === characters[1] && characters[1] === characters[2]
+    const validSqare = ["X", "O"]
+    return validSqare.includes(position[0]) && position[0] === position[1] && position[1] === position[2]
   }
 
-  function winStatus(boardState: string[]) { //if any of these conditions are met then there is a winner
+  function winStatus(board: string[]) { //if any of these conditions are met then there is a winner
 
-    if (allAreEqualAndValid([boardState[0], boardState[1], boardState[2]])) {
-      return "winner is " + boardState[0]
+    if (allAreEqualAndValid([board[0], board[1], board[2]])) {
+      return "winner is " + board[0]
     }
-    if (allAreEqualAndValid([boardState[3], boardState[4], boardState[5]])) {
-      return "winner is " + boardState[3]
+    if (allAreEqualAndValid([board[3], board[4], board[5]])) {
+      return "winner is " + board[3]
     }
-    if (allAreEqualAndValid([boardState[6], boardState[7], boardState[8]])) {
-      return "winner is " + boardState[6]
+    if (allAreEqualAndValid([board[6], board[7], board[8]])) {
+      return "winner is " + board[6]
     }
-    if (allAreEqualAndValid([boardState[0], boardState[3], boardState[6]])) {
-      return "winner is " + boardState[0]
+    if (allAreEqualAndValid([board[0], board[3], board[6]])) {
+      return "winner is " + board[0]
     }
-    if (allAreEqualAndValid([boardState[1], boardState[4], boardState[7]])) {
-      return "winner is " + boardState[1]
+    if (allAreEqualAndValid([board[1], board[4], board[7]])) {
+      return "winner is " + board[1]
     }
-    if (allAreEqualAndValid([boardState[2], boardState[5], boardState[8]])) {
-      return "winner is " + boardState[2]
+    if (allAreEqualAndValid([board[2], board[5], board[8]])) {
+      return "winner is " + board[2]
     }
-    if (allAreEqualAndValid([boardState[0], boardState[4], boardState[8]])) {
-      return "winner is " + boardState[0]
+    if (allAreEqualAndValid([board[0], board[4], board[8]])) {
+      return "winner is " + board[0]
     }
-    if (allAreEqualAndValid([boardState[2], boardState[4], boardState[6]])) {
-      return "winner is " + boardState[2]
+    if (allAreEqualAndValid([board[2], board[4], board[6]])) {
+      return "winner is " + board[2]
     }
     else {
       return "No one has won yet!"
     }
 
   }
+  function handleInput() {
+    setInput1(input1)
+    setInput2(input2)
+  }
 
-  const day = new Date().getDay()
-  console.log("It is this day: ", day)
+  function handleSubmit(input1: string, input2: string) {
 
-
-
-
+    setPlayerName1(input1);
+    setPlayerName2(input2);
+  }
 
   return (
     <>
-      <div>{winStatus(boardState)}</div>
-      {conditional ?
-        <>
-          <input value={playerName1} onChange={e => setPlayerName1(e.target.value)} />
-          <input value={playerName2} onChange={e => setPlayerName2(e.target.value)} />
-          <button onClick={() => {
-            setConditional(false)
-          }}>Get Started</button>
+      <>
+        <div>{winStatus(board)}</div>
+        <input type="text" value={input1} onChange={handleInput} />
+        <input type="text" value={input2} onChange={handleInput} />
+        <button onClick={() => handleSubmit(input1, input2)}>Submit</button>
 
-          <div>
-            <BoardSquare buttonValue={boardState[0]} onClick={() => { boardSquareHandler(0) }} />
-            <BoardSquare buttonValue={boardState[1]} onClick={() => { boardSquareHandler(1) }} />
-            <BoardSquare buttonValue={boardState[2]} onClick={() => { boardSquareHandler(2) }} />
-          </div>
-          <div>
-            <BoardSquare buttonValue={boardState[3]} onClick={() => { boardSquareHandler(3) }} />
-            <BoardSquare buttonValue={boardState[4]} onClick={() => { boardSquareHandler(4) }} />
-            <BoardSquare buttonValue={boardState[5]} onClick={() => { boardSquareHandler(5) }} />
-          </div>
-          <div>
-            <BoardSquare buttonValue={boardState[6]} onClick={() => { boardSquareHandler(6) }} />
-            <BoardSquare buttonValue={boardState[7]} onClick={() => { boardSquareHandler(7) }} />
-            <BoardSquare buttonValue={boardState[8]} onClick={() => { boardSquareHandler(8) }} />
-          </div>
-        </> : <div>insert snake here</div>
-      }
-      <div>
-        {playerName1} v {playerName2}
-      </div>
 
+        <div>
+          <BoardSquare buttonValue={board[0]} onClick={() => { boardSquareHandler(0) }} />
+          <BoardSquare buttonValue={board[1]} onClick={() => { boardSquareHandler(1) }} />
+          <BoardSquare buttonValue={board[2]} onClick={() => { boardSquareHandler(2) }} />
+        </div>
+        <div>
+          <BoardSquare buttonValue={board[3]} onClick={() => { boardSquareHandler(3) }} />
+          <BoardSquare buttonValue={board[4]} onClick={() => { boardSquareHandler(4) }} />
+          <BoardSquare buttonValue={board[5]} onClick={() => { boardSquareHandler(5) }} />
+        </div>
+        <div>
+          <BoardSquare buttonValue={board[6]} onClick={() => { boardSquareHandler(6) }} />
+          <BoardSquare buttonValue={board[7]} onClick={() => { boardSquareHandler(7) }} />
+          <BoardSquare buttonValue={board[8]} onClick={() => { boardSquareHandler(8) }} />
+        </div>
+        <div>
+          {playerName1} v {playerName2}
+        </div>
+      </>
     </>
   )
-  //change for pull request
-
 }
 
-export default App
+// //function updateBoard(boardState: string[]) {
+// const newBoard = boardState.slice()
+
+// }
+
+
+
+

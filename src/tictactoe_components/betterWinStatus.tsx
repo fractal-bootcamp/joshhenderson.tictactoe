@@ -18,10 +18,7 @@ function winStatus(boardState: string[]) { //if any of these conditions are met 
 }
 
 function winStatus2(boardState: string[]) {
-    boardState.map(b, i) {
-        if (i === i + 1 === i + 2) {
-            return "{i} is the winner"
-        }
-        if ( )
-    }
+    boardState.map((square, index) => {
+
+    })
 }
