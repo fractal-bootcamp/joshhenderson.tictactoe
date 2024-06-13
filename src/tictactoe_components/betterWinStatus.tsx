@@ -1,4 +1,4 @@
-function winStatus(boardState: string[]) { //if any of these conditions are met then there is a winner
+export default function winStatus2(boardState: string[]) { //if any of these conditions are met then there is a winner
     if (boardState[0] === "X" || "O" && boardState[1] === "X" || "O" && boardState[2] === "X" || "O") {
         return "winner"
     }
@@ -15,10 +15,9 @@ function winStatus(boardState: string[]) { //if any of these conditions are met 
     else {
         return "No one has won yet!"
     }
-}
 
-function winStatus2(boardState: string[]) {
-    boardState.map((square, index) => {
 
-    })
-}
+
+    return
+};
+    
