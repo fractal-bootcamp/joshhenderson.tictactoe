@@ -35,7 +35,13 @@ const GameBoard: React.FC<GameBoardProps> = ({ gridSize, cellSize, snake1, snake
 
 
     return (
-        <div>
+        <div
+            className="grid bg-white border border-gray-300"
+            style={{
+                gridTemplateColumns: `repeat(${gridSize}, ${cellSize}px)`,
+                gridTemplateRows: `repeat(${gridSize}, ${cellSize}px)`
+            }}
+        >
             {Array.from({ length: gridSize * gridSize }).map((_, index) => renderCell(index))}
         </div>
     )

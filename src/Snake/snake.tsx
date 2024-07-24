@@ -86,7 +86,7 @@ export default function Snake() {
                 snake1: movementFunction(prev.snake1, prev.direction1),
                 snake2: movementFunction(prev.snake2, prev.direction2)
             }))
-        }, 200)
+        }, 500)
 
         return () => clearInterval(gameloop) // clean up function to prevent multiple intervals running simultaneously, and that gameloop stops when the component is no longer in use
     }, [movementFunction]);
