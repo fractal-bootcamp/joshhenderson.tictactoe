@@ -53,6 +53,7 @@ export default function Snake() {
         score2: 0,
     })
 
+
     //Movement Function
     const movementFunction = useCallback((snake: Snake, direction: Direction): Snake => {
         const head = snake[0]; //head of the snake is the first x,y value (position object) in the array and the movement comes from changing the head every X miliseconds or on user input 
