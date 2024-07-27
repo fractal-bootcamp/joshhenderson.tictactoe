@@ -80,6 +80,34 @@ export default function Snake() {
         return [newHead, ...snake.slice(0, -1)]; //adds to the new head value to a copy of the prev snake position array but with the last index value sliced off
     }, [gameSettings.gridSize]);
 
+    //GENERATE NEW FOOD - This is probably shit code and an unneccessary while expression 
+    function generateNewFood(snake1: Snake, snake2: Snake, gridSize: number): Position {
+        let newFood: Position;
+        do {
+            newFood = {
+                x: Math.floor(Math.random() * gridSize),
+                y: Math.floor(Math.random() * gridSize)
+            };
+        } while (
+            snake1.some(bodyPart => bodyPart.x === newFood.x && bodyPart.y === newFood.y) ||
+            snake2.some(bodyPart => bodyPart.x === newFood.x && bodyPart.y === newFood.y)
+        );
+        return newFood;
+    }
+
+    //CHECK COLLISION 
+    function checkCollision(snake: Snake): boolean {
+        const head = snake[0];
+        return snake.slice(1).some(bodyPart => bodyPart.x === head.x && bodyPart.y === head.y);
+    }
+
+    //CHECK SNAKE COLLISION
+    function checkSnakeCollision(snake: Snake, otherSnake: Snake): boolean {
+        const head = snake[0];
+        return otherSnake.some(bodyPart => bodyPart.x === head.x && bodyPart.y === head.y)
+    }
+
+
     //USE EFFECT
 
     useEffect(() => {
@@ -143,11 +171,60 @@ export default function Snake() {
     useEffect(() => {
         if (!paused) {
             const gameloop = setInterval(() => {
-                setGameState(prev => ({
-                    ...prev,
-                    snake1: movementFunction(prev.snake1, prev.direction1),
-                    snake2: movementFunction(prev.snake2, prev.direction2)
-                }));
+                setGameState(prev => {
+                    const newSnake1 = movementFunction(prev.snake1, prev.direction1);
+                    const newSnake2 = movementFunction(prev.snake2, prev.direction2);
+
+                    const newFood = prev.food;
+                    const newScore1 = prev.score1;
+                    const newScore2 = prev.score2;
+
+                    //check if snake1 ate food 
+
+                    const { score1, food, biggerSnake1 } = (() => {
+                        if (newSnake1[0].x === prev.food?.x && newSnake1[0].y === prev.food?.y) {
+                            const score1 = newScore1 + 1;
+                            const food = generateNewFood(newSnake1, newSnake2, gameSettings.gridSize);
+                            const biggerSnake1 = [...newSnake1, prev.snake1.length - 1];
+
+                            return { score1, food, biggerSnake1 }
+                        }
+                    })()
+
+                    //check if snake2 ate food 
+                    if (newSnake2[0].x === prev.food?.x && newSnake2[0].y === prev.food?.y) {
+
+                        const score2 = newScore2 + 1;
+                        const food = generateNewFood(newSnake1, newSnake2, gameSettings.gridSize);
+                        const biggerSnake2 = [...newSnake2, prev.snake2.length - 1];
+
+                    }
+
+                    //check is snake 1 fucked up 
+
+                    if (checkCollision(newSnake1) || checkSnakeCollision(newSnake1, newSnake2)) {
+                        // Handle game over for snake1
+                        alert('Snake 1 collided!')
+                        console.log("Snake 1 collided!");
+                        setPaused(true);
+                    }
+
+                    //check if snake 2 fucked up 
+                    if (checkCollision(newSnake2) || checkSnakeCollision(newSnake2, newSnake1)) {
+                        // Handle game over for snake2
+                        alert('Snake 2 collided!')
+                        console.log("Snake 2 collided!");
+                        setPaused(true);
+                    }
+
+                    return {
+                        ...prev,
+                        snake1: biggerSnake1,
+                        snake2: biggerSnake2,
+                        food: 
+                    }
+
+                });
             }, 500);
 
             return () => clearInterval(gameloop);
@@ -185,7 +262,7 @@ export default function Snake() {
                     min={10}
                     max={100}
                     value={gameSettings.gridSize}
-                    onChange={(e) => { }}
+                    onChange={(e) => handleBoardSizeChange(Number(e.target.value))}
                     className="border border-gray-300 px-2 py-1 rounded"
                 />
                 <button onClick={handlePause}>Pause</button>
