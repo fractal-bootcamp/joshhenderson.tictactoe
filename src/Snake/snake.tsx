@@ -33,8 +33,8 @@ export default function Snake() {
         gridSize: 20,
         cellSize: 20,
     });
-    //function to initialize the snake's position in the middle of the based on the board size that the user inputs and a given offset  
-    const initializeSnake = (offsetX: number, offsetY: number): Snake => {
+
+    const renderSnake = (offsetX: number, offsetY: number): Snake => {
         //takes a single axis of the board and divides by 2 to set the snake in the middle  
         //the offset is different for play 1 vs player 2 so the snakes dont start in the same position
         const centerX = Math.floor(gameSettings.gridSize / 2) + offsetX;
@@ -44,8 +44,8 @@ export default function Snake() {
 
     //initialize the game state with each snake traveling in opposite direction and slightly offset from center of board with each player having score 0
     const [gameState, setGameState] = useState<GameState>({
-        snake1: initializeSnake(-2, 0),
-        snake2: initializeSnake(2, 0),
+        snake1: renderSnake(-2, 0),
+        snake2: renderSnake(2, 0),
         food: { x: 1, y: 2 },
         direction1: 'RIGHT',
         direction2: 'LEFT',
@@ -55,7 +55,7 @@ export default function Snake() {
 
     const [paused, setPaused] = useState(true)
 
-    //Movement Function
+    //MOVEMENT FUNCTION
     const movementFunction = useCallback((snake: Snake, direction: Direction): Snake => {
         const head = snake[0]; //head of the snake is the first x,y value (position object) in the array and the movement comes from changing the head every X miliseconds or on user input 
         const newHead = { ...head }; //new head starts with the old head (hence the spread operation) and is then manipulated based on current direction (the following switch case)
@@ -64,22 +64,81 @@ export default function Snake() {
         //when the snake grows in size we will check if the head position values conflict with existing values in the snake array of positions
         switch (direction) {
             case 'UP':
-                newHead.y = (newHead.y - 1 + gameSettings.gridSize) % gameSettings.gridSize //the grid size is added to the value so as to prevent negative values 
+                newHead.y = (newHead.y - 1 + gameSettings.gridSize) % gameSettings.gridSize
                 break;
             case 'DOWN':
-                newHead.y = (newHead.y - 1 + gameSettings.gridSize) % gameSettings.gridSize //the grid size is added to the value so as to prevent negative values 
+                newHead.y = (newHead.y + 1) % gameSettings.gridSize
                 break;
             case 'LEFT':
-                newHead.y = (newHead.y - 1 + gameSettings.gridSize) % gameSettings.gridSize //the grid size is added to the value so as to prevent negative values 
+                newHead.x = (newHead.x - 1 + gameSettings.gridSize) % gameSettings.gridSize
                 break;
             case 'RIGHT':
-                newHead.y = (newHead.y - 1 + gameSettings.gridSize) % gameSettings.gridSize //the grid size is added to the value so as to prevent negative values 
+                newHead.x = (newHead.x + 1) % gameSettings.gridSize
                 break;
         }
 
         return [newHead, ...snake.slice(0, -1)]; //adds to the new head value to a copy of the prev snake position array but with the last index value sliced off
     }, [gameSettings.gridSize]);
 
+    //USE EFFECT
+
+    useEffect(() => {
+        const handleKeyPress = (event: KeyboardEvent) => {
+            console.log('Key pressed:', event.key);  // Add this line
+
+            // Prevent default behavior for arrow keys and WASD
+            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'w', 'a', 's', 'd'].includes(event.key.toLowerCase())) {
+                event.preventDefault();
+            }
+
+            switch (event.key) {
+                // Snake 1 controls (Arrow keys)
+                case 'ArrowUp':
+                    setGameState(prev => ({ ...prev, direction1: 'UP' }));
+                    break;
+                case 'ArrowDown':
+                    setGameState(prev => ({ ...prev, direction1: 'DOWN' }));
+                    break;
+                case 'ArrowLeft':
+                    setGameState(prev => ({ ...prev, direction1: 'LEFT' }));
+                    break;
+                case 'ArrowRight':
+                    setGameState(prev => ({ ...prev, direction1: 'RIGHT' }));
+                    break;
+                // Snake 2 controls (W, A, S, D)
+                case 'w':
+                case 'W':
+                    setGameState(prev => ({ ...prev, direction2: 'UP' }));
+                    break;
+                case 's':
+                case 'S':
+                    setGameState(prev => ({ ...prev, direction2: 'DOWN' }));
+                    break;
+                case 'a':
+                case 'A':
+                    setGameState(prev => ({ ...prev, direction2: 'LEFT' }));
+                    break;
+                case 'd':
+                case 'D':
+                    setGameState(prev => ({ ...prev, direction2: 'RIGHT' }));
+                    break;
+            }
+        };
+
+        // Prevent scrolling
+        const preventDefault = (e: Event) => e.preventDefault();
+
+        window.addEventListener('keydown', handleKeyPress);
+        // Prevent scrolling on the window
+        window.addEventListener('wheel', preventDefault, { passive: false });
+        window.addEventListener('touchmove', preventDefault, { passive: false });
+
+        return () => {
+            window.removeEventListener('keydown', handleKeyPress);
+            window.removeEventListener('wheel', preventDefault);
+            window.removeEventListener('touchmove', preventDefault);
+        };
+    }, []);
 
     useEffect(() => {
         if (!paused) {
@@ -88,10 +147,10 @@ export default function Snake() {
                     ...prev,
                     snake1: movementFunction(prev.snake1, prev.direction1),
                     snake2: movementFunction(prev.snake2, prev.direction2)
-                }))
-            }, 500)
+                }));
+            }, 500);
 
-            return () => clearInterval(gameloop) // clean up function to prevent multiple intervals running simultaneously, and that gameloop stops when the component is no longer in use
+            return () => clearInterval(gameloop);
         }
     }, [movementFunction, paused]);
 
@@ -105,8 +164,8 @@ export default function Snake() {
         setGameSettings((prev) => ({ ...prev, gridSize: newSize })); //settings is only board size at the moment 
 
         setGameState({ //set gameState to rest the game 
-            snake1: initializeSnake(-2, 0),
-            snake2: initializeSnake(2, 0),
+            snake1: renderSnake(-2, 0),
+            snake2: renderSnake(2, 0),
             food: { x: 1, y: 2 },
             direction1: 'RIGHT',
             direction2: 'LEFT',
@@ -117,7 +176,7 @@ export default function Snake() {
 
 
     return (
-        <div className="flex flex-col items-center justify-center h-screen bg-gray-500">
+        <div className="flex flex-col items-center justify-center h-screen bg-gray-500 overflow-hidden">
             <div>
                 <label className='mr-2'>Board Size</label>
                 <input
