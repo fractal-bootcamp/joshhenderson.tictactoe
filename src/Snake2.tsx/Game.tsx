@@ -7,7 +7,6 @@ type Position = {
 
 type Snake = Position[];
 
-
 type GameState = 'RUNNING' | 'PAUSED' | 'GAME_OVER'; // Pause will be space bar 
 
 const Game = () => {
@@ -35,23 +34,6 @@ const Game = () => {
 
 
 
-
-    //     useEffect(() => {
-    //         const gameLoop = setInterval(()=>{
-    //             if (gameState === 'RUNNING') {
-
-    //             }
-    //         })
-    //     }, 200)
-
-    // return(
-    //     <div>
-    //        <Board snake={snake} food={food} />
-
-    //UI controls such as board size input, score display, etc
-
-    //     </div>
-    // )
 
 }
 

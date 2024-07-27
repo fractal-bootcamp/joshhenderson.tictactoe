@@ -46,13 +46,14 @@ export default function Snake() {
     const [gameState, setGameState] = useState<GameState>({
         snake1: initializeSnake(-2, 0),
         snake2: initializeSnake(2, 0),
-        //food: { x: 1, y: 2 },
+        food: { x: 1, y: 2 },
         direction1: 'RIGHT',
         direction2: 'LEFT',
         score1: 0,
         score2: 0,
     })
 
+    const [paused, setPaused] = useState(true)
 
     //Movement Function
     const movementFunction = useCallback((snake: Snake, direction: Direction): Snake => {
@@ -81,16 +82,24 @@ export default function Snake() {
 
 
     useEffect(() => {
-        const gameloop = setInterval(() => {
-            setGameState(prev => ({
-                ...prev,
-                snake1: movementFunction(prev.snake1, prev.direction1),
-                snake2: movementFunction(prev.snake2, prev.direction2)
-            }))
-        }, 500)
+        if (!paused) {
+            const gameloop = setInterval(() => {
+                setGameState(prev => ({
+                    ...prev,
+                    snake1: movementFunction(prev.snake1, prev.direction1),
+                    snake2: movementFunction(prev.snake2, prev.direction2)
+                }))
+            }, 500)
 
-        return () => clearInterval(gameloop) // clean up function to prevent multiple intervals running simultaneously, and that gameloop stops when the component is no longer in use
-    }, [movementFunction]);
+            return () => clearInterval(gameloop) // clean up function to prevent multiple intervals running simultaneously, and that gameloop stops when the component is no longer in use
+        }
+    }, [movementFunction, paused]);
+
+    const handlePause = () => {
+        setPaused(!paused);
+
+        console.log(gameState)
+    }
 
     const handleBoardSizeChange = (newSize: number) => {
         setGameSettings((prev) => ({ ...prev, gridSize: newSize })); //settings is only board size at the moment 
@@ -98,7 +107,7 @@ export default function Snake() {
         setGameState({ //set gameState to rest the game 
             snake1: initializeSnake(-2, 0),
             snake2: initializeSnake(2, 0),
-            //food: { x: 1, y: 2 },
+            food: { x: 1, y: 2 },
             direction1: 'RIGHT',
             direction2: 'LEFT',
             score1: 0,
@@ -120,7 +129,9 @@ export default function Snake() {
                     onChange={(e) => { }}
                     className="border border-gray-300 px-2 py-1 rounded"
                 />
+                <button onClick={handlePause}>Pause</button>
             </div>
+
             <GameBoard
                 gridSize={gameSettings.gridSize}
                 cellSize={gameSettings.cellSize}
