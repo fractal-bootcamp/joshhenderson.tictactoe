@@ -41,9 +41,14 @@ export default function TicTacToe() {
 
     function BoardSquare({ buttonValue, onClick, }: BoardSquareProps) {
         return (
-            <>
-                <button style={{ color: "red", width: '4em', height: '4em', border: '1px white', backgroundColor: 'white' }} onClick={onClick} value={buttonValue}>{buttonValue}</button>
-            </>
+            <button
+                className='h-16 w-16 text-2xl font-bold flex justify-center align-center'
+                style={{ color: "red", backgroundColor: 'white' }}
+                onClick={onClick}
+                value={buttonValue}
+            >
+                {buttonValue}
+            </button>
         )
     }
 
@@ -149,22 +154,18 @@ export default function TicTacToe() {
 
                 <button onClick={() => handleSubmit(input1, input2)}>Submit</button>
 
-                <div>
+                <div className='grid grid-cols-3 gap-4 w-fit mx-auto mt-4 text-center'>
                     <BoardSquare buttonValue={board[0]} onClick={() => { boardSquareHandler(0) }} />
                     <BoardSquare buttonValue={board[1]} onClick={() => { boardSquareHandler(1) }} />
                     <BoardSquare buttonValue={board[2]} onClick={() => { boardSquareHandler(2) }} />
-                </div>
-                <div>
                     <BoardSquare buttonValue={board[3]} onClick={() => { boardSquareHandler(3) }} />
                     <BoardSquare buttonValue={board[4]} onClick={() => { boardSquareHandler(4) }} />
                     <BoardSquare buttonValue={board[5]} onClick={() => { boardSquareHandler(5) }} />
-                </div>
-                <div>
                     <BoardSquare buttonValue={board[6]} onClick={() => { boardSquareHandler(6) }} />
                     <BoardSquare buttonValue={board[7]} onClick={() => { boardSquareHandler(7) }} />
                     <BoardSquare buttonValue={board[8]} onClick={() => { boardSquareHandler(8) }} />
                 </div>
-                {/* <div>{conditionalDisplay(playerName1)}</div> */}
+
                 {playerName1 && <div>{playerName1} v {playerName2}</div>}
             </>
         </>
