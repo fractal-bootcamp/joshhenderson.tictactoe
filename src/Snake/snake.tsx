@@ -26,6 +26,111 @@ type GameSettings = {
     cellSize: number;
 };
 
+//CHECK COLLISION 
+function checkCollision(snake: Snake): boolean {
+    const head = snake[0];
+    return snake.slice(1).some(bodyPart => bodyPart.x === head.x && bodyPart.y === head.y);
+}
+
+//GENERATE NEW FOOD - This is probably shit code and an unneccessary while expression 
+function generateNewFood(snake1: Snake, snake2: Snake, gridSize: number): Position {
+    let newFood: Position;
+    do {
+        newFood = {
+            x: Math.floor(Math.random() * gridSize),
+            y: Math.floor(Math.random() * gridSize)
+        };
+    } while (
+        snake1.some(bodyPart => bodyPart.x === newFood.x && bodyPart.y === newFood.y) ||
+        snake2.some(bodyPart => bodyPart.x === newFood.x && bodyPart.y === newFood.y)
+    );
+    return newFood;
+}
+
+//CHECK SNAKE COLLISION
+function checkSnakeCollision(snake: Snake, otherSnake: Snake): boolean {
+    const head = snake[0];
+    return otherSnake.some(bodyPart => bodyPart.x === head.x && bodyPart.y === head.y)
+}
+
+//MOVEMENT FUNCTION
+const movementFunction = (snake: Snake, direction: Direction, gridSize: number): Snake => {
+    const head = snake[0]; //head of the snake is the first x,y value (position object) in the array and the movement comes from changing the head every X miliseconds or on user input 
+    const newHead = { ...head }; //new head starts with the old head (hence the spread operation) and is then manipulated based on current direction (the following switch case)
+
+    // we only care about the relevant axis of the direction fo the head, 
+    //when the snake grows in size we will check if the head position values conflict with existing values in the snake array of positions
+    switch (direction) {
+        case 'UP':
+            newHead.y = (newHead.y - 1 + gridSize) % gridSize
+            break;
+        case 'DOWN':
+            newHead.y = (newHead.y + 1) % gridSize
+            break;
+        case 'LEFT':
+            newHead.x = (newHead.x - 1 + gridSize) % gridSize
+            break;
+        case 'RIGHT':
+            newHead.x = (newHead.x + 1) % gridSize
+            break;
+    }
+
+    return [newHead, ...snake.slice(0, -1)]; //adds to the new head value to a copy of the prev snake position array but with the last index value sliced off
+}
+
+const getNewGameState = (prev: GameState, gridSize: number): GameState => {
+    const newSnake1 = movementFunction(prev.snake1, prev.direction1, gridSize);
+    const newSnake2 = movementFunction(prev.snake2, prev.direction2, gridSize);
+
+    const biggerSnake1 = [...newSnake1]; // TODO: make this bigger
+    const biggerSnake2 = [...newSnake2]; // TODO: make this bigger with {x: 0, y: 0}
+
+    const newFood = generateNewFood(newSnake1, newSnake2, gridSize);
+
+    console.log(prev.snake1, prev.snake2, prev.food)
+
+    switch (true) {
+        // snake 1 ate food
+        case newSnake1[0].x === prev.food?.x && newSnake1[0].y === prev.food?.y:
+            const score1 = prev.score1 + 1;
+
+            return {
+                ...prev,
+                snake1: biggerSnake1,
+                snake2: newSnake2,
+                food: newFood,
+                score1: score1,
+                score2: prev.score2
+            }
+
+        // snake 2 ate food
+        case newSnake2[0].x === prev.food?.x && newSnake2[0].y === prev.food?.y:
+            const score2 = prev.score2 + 1;
+
+            return {
+                ...prev,
+                snake1: newSnake1,
+                snake2: biggerSnake2,
+                food: newFood,
+                score1: prev.score1,
+                score2: score2
+
+            }
+
+        // nobody ate food, just move
+        default:
+            return {
+                ...prev,
+                snake1: newSnake1,
+                snake2: newSnake2
+            }
+
+    }
+}
+
+
+
+
 
 export default function Snake() {
 
@@ -54,59 +159,6 @@ export default function Snake() {
     })
 
     const [paused, setPaused] = useState(true)
-
-    //MOVEMENT FUNCTION
-    const movementFunction = useCallback((snake: Snake, direction: Direction): Snake => {
-        const head = snake[0]; //head of the snake is the first x,y value (position object) in the array and the movement comes from changing the head every X miliseconds or on user input 
-        const newHead = { ...head }; //new head starts with the old head (hence the spread operation) and is then manipulated based on current direction (the following switch case)
-
-        // we only care about the relevant axis of the direction fo the head, 
-        //when the snake grows in size we will check if the head position values conflict with existing values in the snake array of positions
-        switch (direction) {
-            case 'UP':
-                newHead.y = (newHead.y - 1 + gameSettings.gridSize) % gameSettings.gridSize
-                break;
-            case 'DOWN':
-                newHead.y = (newHead.y + 1) % gameSettings.gridSize
-                break;
-            case 'LEFT':
-                newHead.x = (newHead.x - 1 + gameSettings.gridSize) % gameSettings.gridSize
-                break;
-            case 'RIGHT':
-                newHead.x = (newHead.x + 1) % gameSettings.gridSize
-                break;
-        }
-
-        return [newHead, ...snake.slice(0, -1)]; //adds to the new head value to a copy of the prev snake position array but with the last index value sliced off
-    }, [gameSettings.gridSize]);
-
-    //GENERATE NEW FOOD - This is probably shit code and an unneccessary while expression 
-    function generateNewFood(snake1: Snake, snake2: Snake, gridSize: number): Position {
-        let newFood: Position;
-        do {
-            newFood = {
-                x: Math.floor(Math.random() * gridSize),
-                y: Math.floor(Math.random() * gridSize)
-            };
-        } while (
-            snake1.some(bodyPart => bodyPart.x === newFood.x && bodyPart.y === newFood.y) ||
-            snake2.some(bodyPart => bodyPart.x === newFood.x && bodyPart.y === newFood.y)
-        );
-        return newFood;
-    }
-
-    //CHECK COLLISION 
-    function checkCollision(snake: Snake): boolean {
-        const head = snake[0];
-        return snake.slice(1).some(bodyPart => bodyPart.x === head.x && bodyPart.y === head.y);
-    }
-
-    //CHECK SNAKE COLLISION
-    function checkSnakeCollision(snake: Snake, otherSnake: Snake): boolean {
-        const head = snake[0];
-        return otherSnake.some(bodyPart => bodyPart.x === head.x && bodyPart.y === head.y)
-    }
-
 
     //USE EFFECT
 
@@ -172,37 +224,12 @@ export default function Snake() {
         if (!paused) {
             const gameloop = setInterval(() => {
                 setGameState(prev => {
-                    const newSnake1 = movementFunction(prev.snake1, prev.direction1);
-                    const newSnake2 = movementFunction(prev.snake2, prev.direction2);
-
-                    const newFood = prev.food;
-                    const newScore1 = prev.score1;
-                    const newScore2 = prev.score2;
 
                     //check if snake1 ate food 
-
-                    const { score1, food, biggerSnake1 } = (() => {
-                        if (newSnake1[0].x === prev.food?.x && newSnake1[0].y === prev.food?.y) {
-                            const score1 = newScore1 + 1;
-                            const food = generateNewFood(newSnake1, newSnake2, gameSettings.gridSize);
-                            const biggerSnake1 = [...newSnake1, prev.snake1.length - 1];
-
-                            return { score1, food, biggerSnake1 }
-                        }
-                    })()
-
-                    //check if snake2 ate food 
-                    if (newSnake2[0].x === prev.food?.x && newSnake2[0].y === prev.food?.y) {
-
-                        const score2 = newScore2 + 1;
-                        const food = generateNewFood(newSnake1, newSnake2, gameSettings.gridSize);
-                        const biggerSnake2 = [...newSnake2, prev.snake2.length - 1];
-
-                    }
+                    const { snake1, snake2, food, score1, score2 } = getNewGameState(prev, gameSettings.gridSize)
 
                     //check is snake 1 fucked up 
-
-                    if (checkCollision(newSnake1) || checkSnakeCollision(newSnake1, newSnake2)) {
+                    if (checkCollision(snake1) || checkSnakeCollision(snake1, snake2)) {
                         // Handle game over for snake1
                         alert('Snake 1 collided!')
                         console.log("Snake 1 collided!");
@@ -210,20 +237,21 @@ export default function Snake() {
                     }
 
                     //check if snake 2 fucked up 
-                    if (checkCollision(newSnake2) || checkSnakeCollision(newSnake2, newSnake1)) {
+                    if (checkCollision(snake2) || checkSnakeCollision(snake2, snake1)) {
                         // Handle game over for snake2
                         alert('Snake 2 collided!')
                         console.log("Snake 2 collided!");
                         setPaused(true);
                     }
 
-                    return {
+                    return { // what I'm trying to get out of this section of code... 
                         ...prev,
-                        snake1: biggerSnake1,
-                        snake2: biggerSnake2,
-                        food: 
-                    }
-
+                        snake1: snake1,
+                        snake2: snake2,
+                        food: food,
+                        score1: score1,
+                        score2: score2
+                    };
                 });
             }, 500);
 
@@ -273,7 +301,7 @@ export default function Snake() {
                 cellSize={gameSettings.cellSize}
                 snake1={gameState.snake1}
                 snake2={gameState.snake2}
-                food={{ x: 1, y: 2 }}
+                food={gameState.food || { x: 0, y: 0 }}
             />
         </div>
     )
