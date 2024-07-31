@@ -152,8 +152,8 @@ export default function Snake() {
         snake1: renderSnake(-2, 0),
         snake2: renderSnake(2, 0),
         food: { x: 1, y: 2 },
-        direction1: 'RIGHT',
-        direction2: 'LEFT',
+        direction1: 'LEFT',
+        direction2: 'RIGHT',
         score1: 0,
         score2: 0,
     })
@@ -166,43 +166,30 @@ export default function Snake() {
         const handleKeyPress = (event: KeyboardEvent) => {
             console.log('Key pressed:', event.key);  // Add this line
 
-            // Prevent default behavior for arrow keys and WASD
-            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'w', 'a', 's', 'd'].includes(event.key.toLowerCase())) {
+            const directionMappings = {
+                arrowup: 'UP',
+                arrowdown: 'DOWN',
+                arrowleft: 'LEFT',
+                arrowright: 'RIGHT',
+                w: 'UP',
+                s: 'DOWN',
+                a: 'LEFT',
+                d: 'RIGHT',
+            };
+
+            const key = event.key.toLocaleLowerCase();
+
+            if (key in directionMappings) {
                 event.preventDefault();
+                const direction = directionMappings[key as keyof typeof directionMappings]
+                const isSnake1 = key.startsWith('arrow');
+                setGameState(prev => ({
+                    ...prev,
+                    [isSnake1 ? 'direction1' : 'direction2']: direction
+                }))
             }
 
-            switch (event.key) {
-                // Snake 1 controls (Arrow keys)
-                case 'ArrowUp':
-                    setGameState(prev => ({ ...prev, direction1: 'UP' }));
-                    break;
-                case 'ArrowDown':
-                    setGameState(prev => ({ ...prev, direction1: 'DOWN' }));
-                    break;
-                case 'ArrowLeft':
-                    setGameState(prev => ({ ...prev, direction1: 'LEFT' }));
-                    break;
-                case 'ArrowRight':
-                    setGameState(prev => ({ ...prev, direction1: 'RIGHT' }));
-                    break;
-                // Snake 2 controls (W, A, S, D)
-                case 'w':
-                case 'W':
-                    setGameState(prev => ({ ...prev, direction2: 'UP' }));
-                    break;
-                case 's':
-                case 'S':
-                    setGameState(prev => ({ ...prev, direction2: 'DOWN' }));
-                    break;
-                case 'a':
-                case 'A':
-                    setGameState(prev => ({ ...prev, direction2: 'LEFT' }));
-                    break;
-                case 'd':
-                case 'D':
-                    setGameState(prev => ({ ...prev, direction2: 'RIGHT' }));
-                    break;
-            }
+
         };
 
         // Prevent scrolling
