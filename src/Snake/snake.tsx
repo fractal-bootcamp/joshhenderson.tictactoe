@@ -14,7 +14,7 @@ type Direction = 'UP' | 'DOWN' | 'LEFT' | 'RIGHT';
 type GameState = {
     snake1: Snake;
     snake2: Snake;
-    food?: Position;
+    food: Position;
     direction1: Direction;
     direction2: Direction;
     score1: number;
@@ -82,8 +82,12 @@ const getNewGameState = (prev: GameState, gridSize: number): GameState => {
     const newSnake1 = movementFunction(prev.snake1, prev.direction1, gridSize);
     const newSnake2 = movementFunction(prev.snake2, prev.direction2, gridSize);
 
-    const biggerSnake1 = [...newSnake1]; // TODO: make this bigger
-    const biggerSnake2 = [...newSnake2]; // TODO: make this bigger with {x: 0, y: 0}
+    const biggerSnake1 = [...newSnake1, prev.snake1[prev.snake1.length - 1]];
+    const biggerSnake2 = [...newSnake2, prev.snake2[prev.snake2.length - 1]];
+
+    const array = [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }];
+    array[4 - 1]
+    array[3]
 
     const newFood = generateNewFood(newSnake1, newSnake2, gridSize);
 
@@ -93,6 +97,7 @@ const getNewGameState = (prev: GameState, gridSize: number): GameState => {
         // snake 1 ate food
         case newSnake1[0].x === prev.food?.x && newSnake1[0].y === prev.food?.y:
             const score1 = prev.score1 + 1;
+
 
             return {
                 ...prev,
