@@ -280,7 +280,7 @@ export default function Snake() {
                     onChange={(e) => handleBoardSizeChange(Number(e.target.value))}
                     className="border border-gray-300 px-2 py-1 rounded"
                 />
-                <button onClick={handlePause}>Pause</button>
+                <button onClick={handlePause}>{paused ? 'Play' : 'Pause'}</button>
             </div>
 
             <GameBoard
