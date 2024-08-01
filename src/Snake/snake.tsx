@@ -223,17 +223,21 @@ export default function Snake() {
                     //check is snake 1 fucked up 
                     if (checkCollision(snake1) || checkSnakeCollision(snake1, snake2)) {
                         // Handle game over for snake1
-                        alert('Snake 1 collided!')
-                        console.log("Snake 1 collided!");
-                        setPaused(true);
+                        setTimeout(() => {
+                            alert('Snake 1 collided!');
+                            console.log("Snake 1 collided!");
+                            setPaused(true);
+                        }, 500);
                     }
 
                     //check if snake 2 fucked up 
                     if (checkCollision(snake2) || checkSnakeCollision(snake2, snake1)) {
                         // Handle game over for snake2
-                        alert('Snake 2 collided!')
-                        console.log("Snake 2 collided!");
-                        setPaused(true);
+                        setTimeout(() => {
+                            alert('Snake 2 collided!');
+                            console.log("Snake 2 collided!");
+                            setPaused(true);
+                        }, 500);
                     }
 
                     return { // what I'm trying to get out of this section of code... 
