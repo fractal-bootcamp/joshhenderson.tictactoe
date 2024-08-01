@@ -50,7 +50,15 @@ function generateNewFood(snake1: Snake, snake2: Snake, gridSize: number): Positi
 //CHECK SNAKE COLLISION
 function checkSnakeCollision(snake: Snake, otherSnake: Snake): boolean {
     const head = snake[0];
-    return otherSnake.some(bodyPart => bodyPart.x === head.x && bodyPart.y === head.y)
+    const otherHead = otherSnake[0];
+
+    // Check for head-on collision
+    if (head.x === otherHead.x && head.y === otherHead.y) {
+        return true;
+    }
+
+    // Check if the head collides with any part of the other snake's body
+    return otherSnake.some(bodyPart => bodyPart.x === head.x && bodyPart.y === head.y);
 }
 
 //MOVEMENT FUNCTION
@@ -85,41 +93,31 @@ const getNewGameState = (prev: GameState, gridSize: number): GameState => {
     const biggerSnake1 = [...newSnake1, prev.snake1[prev.snake1.length - 1]];
     const biggerSnake2 = [...newSnake2, prev.snake2[prev.snake2.length - 1]];
 
-    const array = [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }];
-    array[4 - 1]
-    array[3]
-
     const newFood = generateNewFood(newSnake1, newSnake2, gridSize);
 
-    console.log(prev.snake1, prev.snake2, prev.food)
+    let foodEaten = false;
 
     switch (true) {
         // snake 1 ate food
         case newSnake1[0].x === prev.food?.x && newSnake1[0].y === prev.food?.y:
-            const score1 = prev.score1 + 1;
-
-
+            foodEaten = true;
             return {
                 ...prev,
                 snake1: biggerSnake1,
                 snake2: newSnake2,
                 food: newFood,
-                score1: score1,
-                score2: prev.score2
+                score1: prev.score1 + 1,
             }
 
         // snake 2 ate food
         case newSnake2[0].x === prev.food?.x && newSnake2[0].y === prev.food?.y:
-            const score2 = prev.score2 + 1;
-
+            foodEaten = true;
             return {
                 ...prev,
                 snake1: newSnake1,
                 snake2: biggerSnake2,
                 food: newFood,
-                score1: prev.score1,
-                score2: score2
-
+                score2: prev.score2 + 1,
             }
 
         // nobody ate food, just move
@@ -127,9 +125,8 @@ const getNewGameState = (prev: GameState, gridSize: number): GameState => {
             return {
                 ...prev,
                 snake1: newSnake1,
-                snake2: newSnake2
+                snake2: newSnake2,
             }
-
     }
 }
 
@@ -143,6 +140,8 @@ export default function Snake() {
         gridSize: 20,
         cellSize: 20,
     });
+
+    const [gameInterval, setGameInterval] = useState(500); // Start with 500ms interval
 
     const renderSnake = (offsetX: number, offsetY: number): Snake => {
         //takes a single axis of the board and divides by 2 to set the snake in the middle  
@@ -164,6 +163,7 @@ export default function Snake() {
     })
 
     const [paused, setPaused] = useState(true)
+    const [collisionOccurred, setCollisionOccurred] = useState(false);
 
     //USE EFFECT
 
@@ -216,44 +216,44 @@ export default function Snake() {
         if (!paused) {
             const gameloop = setInterval(() => {
                 setGameState(prev => {
+                    const newState = getNewGameState(prev, gameSettings.gridSize);
 
-                    //check if snake1 ate food 
-                    const { snake1, snake2, food, score1, score2 } = getNewGameState(prev, gameSettings.gridSize)
-
-                    //check is snake 1 fucked up 
-                    if (checkCollision(snake1) || checkSnakeCollision(snake1, snake2)) {
-                        // Handle game over for snake1
-                        setTimeout(() => {
-                            alert('Snake 1 collided!');
-                            console.log("Snake 1 collided!");
-                            setPaused(true);
-                        }, 500);
+                    // Check if food was eaten
+                    if (newState.food !== prev.food) {
+                        // Decrease interval by 10ms, but not below 100ms
+                        setGameInterval(prevInterval => Math.max(prevInterval - 10, 100));
                     }
 
-                    //check if snake 2 fucked up 
-                    if (checkCollision(snake2) || checkSnakeCollision(snake2, snake1)) {
-                        // Handle game over for snake2
-                        setTimeout(() => {
-                            alert('Snake 2 collided!');
-                            console.log("Snake 2 collided!");
-                            setPaused(true);
-                        }, 500);
+                    if (!collisionOccurred) {
+                        const snake1Collision = checkCollision(newState.snake1) || checkSnakeCollision(newState.snake1, newState.snake2);
+                        const snake2Collision = checkCollision(newState.snake2) || checkSnakeCollision(newState.snake2, newState.snake1);
+
+                        if (snake1Collision || snake2Collision) {
+                            setCollisionOccurred(true);
+                            setTimeout(() => {
+                                if (snake1Collision && snake2Collision) {
+                                    alert('Both snakes collided!');
+                                    console.log("Both snakes collided!");
+                                } else if (snake1Collision) {
+                                    alert('Snake 1 collided!');
+                                    console.log("Snake 1 collided!");
+                                } else {
+                                    alert('Snake 2 collided!');
+                                    console.log("Snake 2 collided!");
+                                }
+                                setPaused(true);
+                                setCollisionOccurred(false);
+                            }, 500);
+                        }
                     }
 
-                    return { // what I'm trying to get out of this section of code... 
-                        ...prev,
-                        snake1: snake1,
-                        snake2: snake2,
-                        food: food,
-                        score1: score1,
-                        score2: score2
-                    };
+                    return newState;
                 });
-            }, 500);
+            }, gameInterval);
 
             return () => clearInterval(gameloop);
         }
-    }, [movementFunction, paused]);
+    }, [movementFunction, paused, collisionOccurred, gameSettings.gridSize, gameInterval]);
 
     const handlePause = () => {
         setPaused(!paused);
