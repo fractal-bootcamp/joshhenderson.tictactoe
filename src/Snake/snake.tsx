@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useState } from "react";
-import Board from "./board"
+import { useEffect, useState } from "react";
 import GameBoard from "./board";
+import GameOverScreen from "./GameOverScreen";
 
 type Position = {
     x: number;
@@ -164,6 +164,7 @@ export default function Snake() {
     })
 
     const [paused, setPaused] = useState(true)
+    const [isGameOver, setIsGameOver] = useState(false);
 
     //USE EFFECT
 
@@ -216,44 +217,30 @@ export default function Snake() {
         if (!paused) {
             const gameloop = setInterval(() => {
                 setGameState(prev => {
+                    const { snake1, snake2, food, score1, score2 } = getNewGameState(prev, gameSettings.gridSize);
 
-                    //check if snake1 ate food 
-                    const { snake1, snake2, food, score1, score2 } = getNewGameState(prev, gameSettings.gridSize)
-
-                    //check is snake 1 fucked up 
-                    if (checkCollision(snake1) || checkSnakeCollision(snake1, snake2)) {
-                        // Handle game over for snake1
-                        setTimeout(() => {
-                            alert('Snake 1 collided!');
-                            console.log("Snake 1 collided!");
-                            setPaused(true);
-                        }, 500);
+                    if (checkCollision(snake1) || checkSnakeCollision(snake1, snake2) ||
+                        checkCollision(snake2) || checkSnakeCollision(snake2, snake1)) {
+                        clearInterval(gameloop);
+                        setIsGameOver(true);
+                        setPaused(true);
+                        return prev;
                     }
 
-                    //check if snake 2 fucked up 
-                    if (checkCollision(snake2) || checkSnakeCollision(snake2, snake1)) {
-                        // Handle game over for snake2
-                        setTimeout(() => {
-                            alert('Snake 2 collided!');
-                            console.log("Snake 2 collided!");
-                            setPaused(true);
-                        }, 500);
-                    }
-
-                    return { // what I'm trying to get out of this section of code... 
+                    return {
                         ...prev,
-                        snake1: snake1,
-                        snake2: snake2,
-                        food: food,
-                        score1: score1,
-                        score2: score2
+                        snake1,
+                        snake2,
+                        food,
+                        score1,
+                        score2
                     };
                 });
             }, 500);
 
             return () => clearInterval(gameloop);
         }
-    }, [movementFunction, paused]);
+    }, [paused, gameSettings.gridSize]);
 
     const handlePause = () => {
         setPaused(!paused);
@@ -275,30 +262,52 @@ export default function Snake() {
         })
     }
 
+    const handleRestart = () => {
+        setGameState({
+            snake1: renderSnake(-2, 0),
+            snake2: renderSnake(2, 0),
+            food: { x: 1, y: 2 },
+            direction1: 'LEFT',
+            direction2: 'RIGHT',
+            score1: 0,
+            score2: 0,
+        });
+        setIsGameOver(false);
+        setPaused(false);
+    };
 
     return (
         <div className="flex flex-col items-center justify-center h-screen bg-gray-500 overflow-hidden">
-            <div>
-                <label className='mr-2'>Board Size</label>
-                <input
-                    id='boardSize'
-                    type="number"
-                    min={10}
-                    max={100}
-                    value={gameSettings.gridSize}
-                    onChange={(e) => handleBoardSizeChange(Number(e.target.value))}
-                    className="border border-gray-300 px-2 py-1 rounded"
+            {!isGameOver ? (
+                <>
+                    <div>
+                        <label className='mr-2'>Board Size</label>
+                        <input
+                            id='boardSize'
+                            type="number"
+                            min={10}
+                            max={100}
+                            value={gameSettings.gridSize}
+                            onChange={(e) => handleBoardSizeChange(Number(e.target.value))}
+                            className="border border-gray-300 px-2 py-1 rounded"
+                        />
+                        <button onClick={handlePause}>{paused ? 'Play' : 'Pause'}</button>
+                    </div>
+                    <GameBoard
+                        gridSize={gameSettings.gridSize}
+                        cellSize={gameSettings.cellSize}
+                        snake1={gameState.snake1}
+                        snake2={gameState.snake2}
+                        food={gameState.food || { x: 0, y: 0 }}
+                    />
+                </>
+            ) : (
+                <GameOverScreen
+                    score1={gameState.score1}
+                    score2={gameState.score2}
+                    onRestart={handleRestart}
                 />
-                <button onClick={handlePause}>{paused ? 'Play' : 'Pause'}</button>
-            </div>
-
-            <GameBoard
-                gridSize={gameSettings.gridSize}
-                cellSize={gameSettings.cellSize}
-                snake1={gameState.snake1}
-                snake2={gameState.snake2}
-                food={gameState.food || { x: 0, y: 0 }}
-            />
+            )}
         </div>
     )
 }
