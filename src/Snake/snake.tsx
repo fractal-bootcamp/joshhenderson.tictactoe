@@ -19,6 +19,7 @@ type GameState = {
     direction2: Direction;
     score1: number;
     score2: number;
+    speed: number; // Added speed property
 }
 
 type GameSettings = {
@@ -97,7 +98,7 @@ const getNewGameState = (prev: GameState, gridSize: number): GameState => {
         // snake 1 ate food
         case newSnake1[0].x === prev.food?.x && newSnake1[0].y === prev.food?.y:
             const score1 = prev.score1 + 1;
-
+            const newSpeed1 = Math.max(50, prev.speed - 5); // Increase speed, but not below 50ms
 
             return {
                 ...prev,
@@ -105,12 +106,14 @@ const getNewGameState = (prev: GameState, gridSize: number): GameState => {
                 snake2: newSnake2,
                 food: newFood,
                 score1: score1,
-                score2: prev.score2
+                score2: prev.score2,
+                speed: newSpeed1, // Update speed
             }
 
         // snake 2 ate food
         case newSnake2[0].x === prev.food?.x && newSnake2[0].y === prev.food?.y:
             const score2 = prev.score2 + 1;
+            const newSpeed2 = Math.max(50, prev.speed - 5); // Increase speed, but not below 50ms
 
             return {
                 ...prev,
@@ -118,8 +121,8 @@ const getNewGameState = (prev: GameState, gridSize: number): GameState => {
                 snake2: biggerSnake2,
                 food: newFood,
                 score1: prev.score1,
-                score2: score2
-
+                score2: score2,
+                speed: newSpeed2, // Update speed
             }
 
         // nobody ate food, just move
@@ -161,6 +164,7 @@ export default function Snake() {
         direction2: 'RIGHT',
         score1: 0,
         score2: 0,
+        speed: 150, // Initial speed (milliseconds)
     })
 
     const [paused, setPaused] = useState(true)
@@ -236,11 +240,11 @@ export default function Snake() {
                         score2
                     };
                 });
-            }, 500);
+            }, gameState.speed); // Use the current speed from gameState
 
             return () => clearInterval(gameloop);
         }
-    }, [paused, gameSettings.gridSize]);
+    }, [paused, gameSettings.gridSize, gameState.speed]); // Add gameState.speed to dependencies
 
     const handlePause = () => {
         setPaused(!paused);
@@ -259,6 +263,7 @@ export default function Snake() {
             direction2: 'LEFT',
             score1: 0,
             score2: 0,
+            speed: 150, // Reset speed to initial value
         })
     }
 
@@ -271,43 +276,50 @@ export default function Snake() {
             direction2: 'RIGHT',
             score1: 0,
             score2: 0,
+            speed: 150, // Reset speed to initial value
         });
         setIsGameOver(false);
         setPaused(false);
     };
 
     return (
-        <div className="flex flex-col items-center justify-center h-screen bg-gray-500 overflow-hidden">
-            {!isGameOver ? (
-                <>
-                    <div>
-                        <label className='mr-2'>Board Size</label>
-                        <input
-                            id='boardSize'
-                            type="number"
-                            min={10}
-                            max={100}
-                            value={gameSettings.gridSize}
-                            onChange={(e) => handleBoardSizeChange(Number(e.target.value))}
-                            className="border border-gray-300 px-2 py-1 rounded"
-                        />
-                        <button onClick={handlePause}>{paused ? 'Play' : 'Pause'}</button>
-                    </div>
-                    <GameBoard
-                        gridSize={gameSettings.gridSize}
-                        cellSize={gameSettings.cellSize}
-                        snake1={gameState.snake1}
-                        snake2={gameState.snake2}
-                        food={gameState.food || { x: 0, y: 0 }}
+        <div className="flex flex-col items-center rounded-md justify-center min-h-screen bg-gray-500 overflow-hidden">
+            <div className="w-full max-w-3xl mx-auto p-4 md:p-6">
+                {!isGameOver ? (
+                    <>
+                        <div className="mb-4">
+                            <label className='mr-2'>Board Size</label>
+                            <input
+                                id='boardSize'
+                                type="number"
+                                min={10}
+                                max={100}
+                                value={gameSettings.gridSize}
+                                onChange={(e) => handleBoardSizeChange(Number(e.target.value))}
+                                className="border border-gray-300 px-2 py-1 rounded"
+                            />
+                            <button onClick={handlePause} className="ml-2 px-4 py-1 bg-blue-500 text-white rounded">
+                                {paused ? 'Play' : 'Pause'}
+                            </button>
+                        </div>
+                        <div className="w-full aspect-square">
+                            <GameBoard
+                                gridSize={gameSettings.gridSize}
+                                cellSize={gameSettings.cellSize}
+                                snake1={gameState.snake1}
+                                snake2={gameState.snake2}
+                                food={gameState.food || { x: 0, y: 0 }}
+                            />
+                        </div>
+                    </>
+                ) : (
+                    <GameOverScreen
+                        score1={gameState.score1}
+                        score2={gameState.score2}
+                        onRestart={handleRestart}
                     />
-                </>
-            ) : (
-                <GameOverScreen
-                    score1={gameState.score1}
-                    score2={gameState.score2}
-                    onRestart={handleRestart}
-                />
-            )}
+                )}
+            </div>
         </div>
     )
 }
