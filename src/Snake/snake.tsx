@@ -165,7 +165,7 @@ export default function Snake() {
 
     const [paused, setPaused] = useState(true)
     const [isGameOver, setIsGameOver] = useState(false);
-
+    const [gameSpeed, setGameSpeed] = useState(150);
     //USE EFFECT
 
     useEffect(() => {
@@ -236,7 +236,7 @@ export default function Snake() {
                         score2
                     };
                 });
-            }, 500);
+            }, gameSpeed);
 
             return () => clearInterval(gameloop);
         }
