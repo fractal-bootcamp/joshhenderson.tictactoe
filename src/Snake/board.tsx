@@ -1,4 +1,3 @@
-
 type Position = {
     x: number;
     y: number;
@@ -35,14 +34,19 @@ const GameBoard: React.FC<GameBoardProps> = ({ gridSize, cellSize, snake1, snake
 
 
     return (
-        <div
-            className="grid bg-white border border-gray-300"
-            style={{
-                gridTemplateColumns: `repeat(${gridSize}, ${cellSize}px)`,
-                gridTemplateRows: `repeat(${gridSize}, ${cellSize}px)`
-            }}
-        >
-            {Array.from({ length: gridSize * gridSize }).map((_, index) => renderCell(index))}
+        <div className="flex justify-center items-center">
+            <div
+                className="grid border-4 border-white"
+                style={{
+                    display: 'grid',
+                    gridTemplateColumns: `repeat(${gridSize}, 1fr)`,
+                    gridTemplateRows: `repeat(${gridSize}, 1fr)`,
+                    width: `${gridSize * cellSize}px`,
+                    height: `${gridSize * cellSize}px`,
+                }}
+            >
+                {Array.from({ length: gridSize * gridSize }).map((_, index) => renderCell(index))}
+            </div>
         </div>
     )
 }

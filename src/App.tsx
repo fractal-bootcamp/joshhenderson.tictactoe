@@ -18,9 +18,9 @@ export default function App() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen">
+    <div className="flex flex-colitems-center justify-center min-h-screen w-screen">
       <NavBar onClick={handleButtonClick} />
-      <div className="w-[80vmin] h-[80vmin] bg-black shadow-lg rounded-lg p-8 flex flex-col items-center justify-center">
+      <div className="flex-grow w-full bg-black shadow-lg rounded-lg p-8 flex flex-col items-center justify-center">
         {game.snake === 'selected' && <Snake />}
         {game.tictactoe === 'selected' && <TicTacToe />}
       </div>

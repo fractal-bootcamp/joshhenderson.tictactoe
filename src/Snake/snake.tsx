@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import GameBoard from "./board";
 import GameOverScreen from "./GameOverScreen";
+import ControlPanel from './ControlPanel';
 
 type Position = {
     x: number;
@@ -277,22 +278,21 @@ export default function Snake() {
     };
 
     return (
-        <div className="flex flex-col items-center justify-center h-screen bg-gray-500 overflow-hidden">
-            {!isGameOver ? (
-                <>
-                    <div>
-                        <label className='mr-2'>Board Size</label>
-                        <input
-                            id='boardSize'
-                            type="number"
-                            min={10}
-                            max={100}
-                            value={gameSettings.gridSize}
-                            onChange={(e) => handleBoardSizeChange(Number(e.target.value))}
-                            className="border border-gray-300 px-2 py-1 rounded"
-                        />
-                        <button onClick={handlePause}>{paused ? 'Play' : 'Pause'}</button>
-                    </div>
+        <div className="relative h-screen w-screen">
+            <ControlPanel
+                gridSize={gameSettings.gridSize}
+                onBoardSizeChange={handleBoardSizeChange}
+                paused={paused}
+                onPauseToggle={handlePause}
+            />
+            <div className="flex justify-center items-center h-full">
+                {isGameOver ? (
+                    <GameOverScreen
+                        score1={gameState.score1}
+                        score2={gameState.score2}
+                        onRestart={handleRestart}
+                    />
+                ) : (
                     <GameBoard
                         gridSize={gameSettings.gridSize}
                         cellSize={gameSettings.cellSize}
@@ -300,14 +300,8 @@ export default function Snake() {
                         snake2={gameState.snake2}
                         food={gameState.food || { x: 0, y: 0 }}
                     />
-                </>
-            ) : (
-                <GameOverScreen
-                    score1={gameState.score1}
-                    score2={gameState.score2}
-                    onRestart={handleRestart}
-                />
-            )}
+                )}
+            </div>
         </div>
     )
 }
