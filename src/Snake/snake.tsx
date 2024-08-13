@@ -167,6 +167,10 @@ export default function Snake() {
     const [paused, setPaused] = useState(true)
     const [isGameOver, setIsGameOver] = useState(false);
     const [gameSpeed, setGameSpeed] = useState(150);
+    const handleGameSpeedChange = (newSpeed: number) => {
+        setGameSpeed(newSpeed);
+    };
+
     //USE EFFECT
 
     useEffect(() => {
@@ -241,7 +245,7 @@ export default function Snake() {
 
             return () => clearInterval(gameloop);
         }
-    }, [paused, gameSettings.gridSize]);
+    }, [paused, gameSettings.gridSize, gameSpeed]);
 
     const handlePause = () => {
         setPaused(!paused);
@@ -284,6 +288,8 @@ export default function Snake() {
                 onBoardSizeChange={handleBoardSizeChange}
                 paused={paused}
                 onPauseToggle={handlePause}
+                gameSpeed={gameSpeed}
+                onGameSpeedChange={handleGameSpeedChange}
             />
             <div className="flex justify-center items-center h-full">
                 {isGameOver ? (
