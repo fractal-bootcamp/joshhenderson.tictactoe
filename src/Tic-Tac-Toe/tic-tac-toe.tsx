@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import '../App.css'
 import { MouseEventHandler } from 'react'
-
+import PlayerInputForm from './Components/PlayerInputForm'
 
 export default function TicTacToe() {
 
@@ -149,10 +149,13 @@ export default function TicTacToe() {
             <>
                 <div>{winStatus(board)}</div>
 
-                <input type="text" value={input1} onChange={(e) => handleFirstInput(e.target.value)} />
-                <input type="text" value={input2} onChange={(e) => handleSecondInput(e.target.value)} />
-
-                <button onClick={() => handleSubmit(input1, input2)}>Submit</button>
+                <PlayerInputForm
+                    input1={input1}
+                    input2={input2}
+                    handleFirstInput={handleFirstInput}
+                    handleSecondInput={handleSecondInput}
+                    handleSubmit={handleSubmit}
+                />
 
                 <div className='grid grid-cols-3 gap-4 w-fit mx-auto mt-4 text-center'>
                     <BoardSquare buttonValue={board[0]} onClick={() => { boardSquareHandler(0) }} />
@@ -171,8 +174,3 @@ export default function TicTacToe() {
         </>
     )
 }
-
-
-
-
-
