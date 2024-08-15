@@ -1,6 +1,7 @@
 import { useState } from "react";
 import TicTacToe from "./Tic-Tac-Toe/tic-tac-toe";
 import Snake from "./Snake/snake";
+import NavBar from "./Components/navBar";
 
 
 export default function App() {
@@ -17,11 +18,12 @@ export default function App() {
   }
 
   return (
-    <>
-      <button onClick={() => { handleButtonClick('snake') }}>Snake</button>
-      <button onClick={() => { handleButtonClick('tictactoe') }}>Tic-Tac-Toe</button>
-      {game.snake === 'selected' && <Snake />}
-      {game.tictactoe === 'selected' && <TicTacToe />}
-    </>
+    <div className="flex flex-colitems-center justify-center min-h-screen w-screen">
+      <NavBar onClick={handleButtonClick} />
+      <div className="flex-grow w-full bg-black shadow-lg rounded-lg p-8 flex flex-col items-center justify-center" style={{ paddingTop: '60px' }}>
+        {game.snake === 'selected' && <Snake />}
+        {game.tictactoe === 'selected' && <TicTacToe />}
+      </div>
+    </div>
   )
 }
